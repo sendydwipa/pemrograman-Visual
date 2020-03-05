@@ -52,23 +52,7 @@ const CreateWindowCreator = () =>{
     createWindow.loadURL(`file://${__dirname}/create.html`);
     createWindow.on("closed", ()=> (createWindow = null));
 };
-const MyBiodata = () =>{
-    data = new BrowserWindow({
-        webPreferences:{
-            nodeIntegration: true
-        },
-        width: 600,
-        height: 400,
-        title:"Create Appointments"
-    });
-    data.setMenu(null);
-    data.loadURL(`file://${__dirname}/biodata.html`);
-    data.on("closed", ()=> (data = null));
-};
 
-ipcMain.on("appointment:create", (event, appointment) =>{
-    console.log(appointment);
-});
 
 const  menuTemplate = [{
     label: "FIle",
@@ -100,14 +84,4 @@ const  menuTemplate = [{
     label:"View",
     submenu : [{role:"reload"}, {role:"toggledevtools"}]
 },
-
-{
-    label:"about me",
-    click(){
-        MyBiodata();
-    }
-},
-
-
-
 ]
