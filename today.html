@@ -1,9 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
 <body>
-    Halo, Selamat Datang di halaman utama
+    <h1>Today windows</h1>
+    <div id="list"></div>
 </body>
+<script>
+    const electron =  require("electron");
+    const{ipcRenderer} = electron;
+    ipcRenderer.send("appointment:request:today");
+
+    ipcRenderer.on("appointment:request:today", (event, appointments) =>{
+        const listDiv = document.getElementById("List");
+        appointments.forEach(appointment => {
+            const appointmentDiv = document.createElement("div");
+            const nameParagraph = document.createElement("p");
+            nameParagraph.innerHTML = `Name: ${appointment.name}`;
+
+            const numberParagrah = document.createElement("p");
+            numberParagrah.innerHTML = `Phone Number:${appointment.number}`;
+
+            const dateParagraph = document.createElement("p");
+            dateParagraph.innerHTML = `date: ${appointment.date}`;
+
+            const hourParagraph = document.createElement("p");
+            hourParagraph.innerHTML = `hour: ${appointment.hour}`;
+
+            const symtompsParagraph = document.createElement("p");
+            symtompsParagraph.innerHTML = `symtomps: ${appointment.symtomps}`;
+
+            const doneParagraph = document.createElement("p");
+            doneParagraph.innerHTML = `Done: ${appointment.done ? "yes":"no"}`;
+
+            const doneButton = document.createElemet("button");
+            doneButton.innerHTML = "Done";
+            doneButton.disabled = appointment.done ? true : false;
+            doneButton.onclick = () => done(appointment.id);
+
+            const hr = documnet.createElement("hr");
+
+            appointmentDiv.appendChild(nameParagraph);
+            appointmentDiv.appendChild(numberParagrah);
+            appointmentDiv.appendChild(dateParagraph);
+            appointmentDiv.appendChild(hourParagraph);
+            appointmentDiv.appendChild(symtompsParagraph);
+            appointmentDiv.appendChild(doneParagraph);
+            appointmentDiv.appendChild(doneButton);
+            appointmentDiv.appendChild(hr);
+
+            listDiv.append(appointmentDiv);
+        });
+    });
+
+    const done = id =>{
+        ipcRenderer.send("appointment:done", id);
+    };
+</script>
 </html>
