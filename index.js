@@ -1,20 +1,18 @@
 const electron = require("electron");
 
 const{app, BrowserWindow, Menu, ipcMain} = electron;
+
 let todayWindow;
 let createWindow;
 let listWindow;
-let data;
 
-
-app.on("ready", () =>{
+app.on("ready", ()=>{
     todayWindow = new BrowserWindow({
         webPreferences:{
             nodeIntegration: true
         },
-        title: "Aplikasi Dokter"
+        title: "my application"
     });
-
     todayWindow.loadURL(`file://${__dirname}/today.html`);
     todayWindow.on("closed", ()=>{
         app.quit();
@@ -23,69 +21,94 @@ app.on("ready", () =>{
 
     const mainMenu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(mainMenu);
-    
+
 });
 
-const ListWindowCreator = () =>{
-    listWindow = new BrowserWindow({
-        webPreferences:{
-            nodeIntegration: true
-        },
-        width: 600,
-        height: 400,
-        title:"All Appointments"
-    });
-    listWindow.setMenu(null);
-    listWindow.loadURL(`file://${__dirname}/list.html`);
-    listWindow.on("closed", ()=> (listWindow = null));
-};
-const CreateWindowCreator = () =>{
+const createWindowCreator = ()=>{
     createWindow = new BrowserWindow({
-        webPreferences:{
+        webPreferences : {
             nodeIntegration: true
         },
         width: 600,
         height: 400,
-        title:"Create Appointments"
+        title: "all we need to create"
     });
     createWindow.setMenu(null);
     createWindow.loadURL(`file://${__dirname}/create.html`);
-    createWindow.on("closed", ()=> (createWindow = null));
+    createWindow.on("closed", ()=>(createWindow = null))
 };
 
-ipcMain.on("appointment:create", (event, appointment) =>{
+const listWindowCreator = ()=>{
+    listWindow = new BrowserWindow({
+        webPreferences : {
+            nodeIntegration: true
+        },
+        width: 600,
+        height: 400,
+        title: "all we need to list"
+    });
+    listWindow.setMenu(null);
+    listWindow.loadURL(`file://${__dirname}/list.html`);
+    listWindow.on("closed", ()=>(listWindow = null))
+};
+
+const AboutWindowCreator = ()=>{
+    aboutWindow = new BrowserWindow({
+        webPreferences : {
+            nodeIntegration: true
+        },
+        width: 1000,
+        height: 800,
+        title: "all we need to list"
+    });
+    aboutWindow.setMenu(null);
+    aboutWindow.loadURL(`file://${__dirname}/about.html`);
+    aboutWindow.on("closed", ()=>(aboutWindow = null))
+};
+
+ipcMain.on("appointment:create", (event, appointment) => {
     console.log(appointment);
 });
 
-const  menuTemplate = [{
-    label: "FIle",
-    submenu : [{
-            label : "New Appoinment",
-            click(){
-                CreateWindowCreator();
-            }
-        },
-        {
-            label : "All Appoinment",
-            click(){
-                ListWindowCreator();
-            }
-        },
-        {
-            label : "Quit",
-            accelerato : process.platform == "darwin" ? "Command+Q" : "Ctrk + Q",
-            click(){
-                app.quit();
-            }
-        }
-    
+ipcMain.on("appointment:request:list", event =>{
+    console.log("here");
+});
 
-    ]
-},
+const menuTemplate = [
+    {
+        label: "file",
+        submenu: [
+            {
+                label: "new appointment",
 
-{
-    label:"View",
-    submenu : [{role:"reload"}, {role:"toggledevtools"}]
-},
+                click(){
+                    createWindowCreator();
+                }
+            },
+            {
+                label:"all appointment",
+                click(){
+                    listWindowCreator();
+                }
+            },
+            {
+                label:"About",
+                click(){
+                    AboutWindowCreator();
+                }
+            },
+            {
+                label: "Quit",
+                accelerator: process.platform == "darwin" ? "Command + Q" : "Ctrl + Q",
+                click(){
+                    app.quit();
+                }
+            }
+        ]
+    },
 
+    {
+        label: "View",
+        submenu: [{role: "reload"}, {role: "toggledevtools"}]
+    }
 ]
