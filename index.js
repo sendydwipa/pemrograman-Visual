@@ -75,11 +75,12 @@ ipcMain.on("appointment:create", (event, appointment) => {
     allAppointment.push(appointment);
 
     createWindow.close();
-    console.log(appointment);
+    console.log(allAppointment);
 });
 
 ipcMain.on("appointment:request:list", event =>{
-    console.log("here");
+    listWindow.webContents.send('appointment:response:list', allAppointment);
+    console.log(allAppointment);
 });
 
 ipcMain.on("appointment:request:today", event =>{

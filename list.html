@@ -10,43 +10,44 @@
     <div id="list"></div>
 </body>
 <script>
-    const electron =  require("electron");
-    const{ipcRenderer} = electron;
-    ipcRenderer.send("appointment:request:list");
-
-    ipcRenderer.on("appointment:request:list", (event, appointments) =>{
-        const listDiv = document.getElementById("List");
-        appointments.forEach(appointment => {
+        const electron = require("electron");
+        const {ipcRenderer} = electron;
+        ipcRenderer.send("appointment:request:list");
+        ipcRenderer.on("appointment:response:list", (event, appoinments) => {
+            const listDiv = document.getElementById("list");
+            appoinments.forEach(appoinment => {
             const appointmentDiv = document.createElement("div");
-            const nameParagraph = document.createElement("p");
-            nameParagraph.innerHTML = `Name: ${appointment.name}`;
 
-            const numberParagrah = document.createElement("p");
-            numberParagrah.innerHTML = `Phone Number:${appointment.number}`;
+            const NameParagraf = document.createElement("p");
+            NameParagraf.innerHTML = `Name : ${appoinment.name}`;
 
-            const dateParagraph = document.createElement("p");
-            dateParagraph.innerHTML = `date: ${appointment.date}`;
+            const NumberParagraf = document.createElement("p");
+            NumberParagraf.innerHTML = `Phone Number : ${appoinment.phone}`;
 
-            const hourParagraph = document.createElement("p");
-            hourParagraph.innerHTML = `hour: ${appointment.hour}`;
+            const DateParagraf = document.createElement("p");
+            DateParagraf.innerHTML = `Date : ${appoinment.date}`;
 
-            const symtompsParagraph = document.createElement("p");
-            symtompsParagraph.innerHTML = `symtomps: ${appointment.symtomps}`;
+            const HourParagraf = document.createElement("p");
+            HourParagraf.innerHTML = `Hour : ${appoinment.hour}`;
 
-            const doneParagraph = document.createElement("p");
-            doneParagraph.innerHTML = `Done: ${appointment.done ? "yes":"no"}`;
+            const SymptonsParagraf = document.createElement("p");
+            SymptonsParagraf.innerHTML = `Symptons : ${appoinment.Symptoms}`;
 
-            const hr = documnet.createElement("hr");
+            const Done = document.createElement("p");
+            Done.innerHTML = `Done : ${appoinment.done ?  "Yes" : "No!"}`;   
 
-            appointmentDiv.appendChild(nameParagraph);
-            appointmentDiv.appendChild(numberParagrah);
-            appointmentDiv.appendChild(dateParagraph);
-            appointmentDiv.appendChild(hourParagraph);
-            appointmentDiv.appendChild(symtompsParagraph);
-            appointmentDiv.appendChild(doneParagraph);
+            const hr = document.createElement("hr");
+
+            appointmentDiv.appendChild(NameParagraf);
+            appointmentDiv.appendChild(NumberParagraf);
+            appointmentDiv.appendChild(DateParagraf);
+            appointmentDiv.appendChild(HourParagraf);
+            appointmentDiv.appendChild(SymptonsParagraf);
+            appointmentDiv.appendChild(Done);
             appointmentDiv.appendChild(hr);
 
             listDiv.append(appointmentDiv);
+            
         });
     });
 </script>
