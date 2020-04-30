@@ -1,131 +1,158 @@
 const electron = require("electron");
 const uuid = require("uuid");
-
+const { v4 } = uuid;
+const fs = require('fs');
 const{app, BrowserWindow, Menu, ipcMain} = electron;
 
 let todayWindow;
 let createWindow;
 let listWindow;
+let data;
 
 let allAppointment = [];
 
-app.on("ready", ()=>{
+fs.readFile("database.json", (err, jsonAppointments) => {
+    if(!err){
+        const oldAppointment = JSON.parse(jsonAppointments);
+        allAppointment = oldAppointment;
+    }
+}); 
+
+app.on("ready", () =>{
     todayWindow = new BrowserWindow({
         webPreferences:{
             nodeIntegration: true
         },
-        title: "my application"
+        title: "Aplikasi Dokter"
     });
+
     todayWindow.loadURL(`file://${__dirname}/today.html`);
     todayWindow.on("closed", ()=>{
+
+        const jsonAppointment = JSON.stringify(allAppointment);
+        fs.writeFileSync("database.json", jsonAppointment);
+
         app.quit();
         todayWindow = null;
     });
 
     const mainMenu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(mainMenu);
-
+    
 });
 
-const createWindowCreator = ()=>{
-    createWindow = new BrowserWindow({
-        webPreferences : {
-            nodeIntegration: true
-        },
-        width: 600,
-        height: 400,
-        title: "all we need to create"
-    });
-    createWindow.setMenu(null);
-    createWindow.loadURL(`file://${__dirname}/create.html`);
-    createWindow.on("closed", ()=>(createWindow = null))
-};
-
-const listWindowCreator = ()=>{
+const ListWindowCreator = () =>{
     listWindow = new BrowserWindow({
-        webPreferences : {
+        webPreferences:{
             nodeIntegration: true
         },
         width: 600,
         height: 400,
-        title: "all we need to list"
+        title:"All Appointments"
     });
     listWindow.setMenu(null);
     listWindow.loadURL(`file://${__dirname}/list.html`);
-    listWindow.on("closed", ()=>(listWindow = null))
+    listWindow.on("closed", ()=> (listWindow = null));
 };
-
-const AboutWindowCreator = ()=>{
-    aboutWindow = new BrowserWindow({
-        webPreferences : {
+const CreateWindowCreator = () =>{
+    createWindow = new BrowserWindow({
+        webPreferences:{
             nodeIntegration: true
         },
-        width: 1000,
-        height: 800,
-        title: "all we need to list"
+        width: 600,
+        height: 400,
+        title:"Create Appointments"
     });
-    aboutWindow.setMenu(null);
-    aboutWindow.loadURL(`file://${__dirname}/about.html`);
-    aboutWindow.on("closed", ()=>(aboutWindow = null))
+    createWindow.setMenu(null);
+    createWindow.loadURL(`file://${__dirname}/create.html`);
+    createWindow.on("closed", ()=> (createWindow = null));
+};
+const MyBiodata = () =>{
+    data = new BrowserWindow({
+        webPreferences:{
+            nodeIntegration: true
+        },
+        width: 600,
+        height: 400,
+        title:"Create Appointments"
+    });
+    data.setMenu(null);
+    data.loadURL(`file://${__dirname}/biodata.html`);
+    data.on("closed", ()=> (data = null));
 };
 
-ipcMain.on("appointment:create", (event, appointment) => {
-    appointment["id"] = uuid.v4();
-    appointment["done"] = 0;
+ipcMain.on("appointment:creates", (event, appointment) =>{
+    appointment["id"] = uuid.v1();
+    appointment["done"] = 0;    
     allAppointment.push(appointment);
-
+    sendTodayAppointments();
     createWindow.close();
     console.log(allAppointment);
 });
 
-ipcMain.on("appointment:request:list", event =>{
+ipcMain.on("appointment:request:list", event => {
     listWindow.webContents.send('appointment:response:list', allAppointment);
-    console.log(allAppointment);
+    // console.log("ini Halaman List");
 });
 
-ipcMain.on("appointment:request:today", event =>{
-    console.log("here2");
-})
+ipcMain.on("appointment:request:today", event => {
+    sendTodayAppointments();
+    console.log("Here2");
+});
 
-ipcMain.on("appointment:done", (event, id) =>{
-    console.log("here3")
-})
+ipcMain.on("appointment:done", (event, id) => {
+    allAppointment.forEach((appoinment)=>{
+        appoinment.done = 1
+    })
 
-const menuTemplate = [
-    {
-        label: "file",
-        submenu: [
-            {
-                label: "new appointment",
+    sendTodayAppointments()
+});
 
-                click(){
-                    createWindowCreator();
-                }
-            },
-            {
-                label:"all appointment",
-                click(){
-                    listWindowCreator();
-                }
-            },
-            {
-                label:"About",
-                click(){
-                    AboutWindowCreator();
-                }
-            },
-            {
-                label: "Quit",
-                accelerator: process.platform == "darwin" ? "Command + Q" : "Ctrl + Q",
-                click(){
-                    app.quit();
-                }
+const sendTodayAppointments = () => {
+    const today = new Date().toISOString().slice(0,10);
+    const filtered = allAppointment.filter(
+        (appoinment) => appoinment.date === today
+    )   
+
+    todayWindow.webContents.send("appointment:response:today", filtered)
+}
+
+const  menuTemplate = [{
+    label: "File",
+    submenu : [{
+            label : "New Appoinment",
+            click(){
+                CreateWindowCreator();
             }
-        ]
-    },
+        },
+        {
+            label : "All Appoinment",
+            click(){
+                ListWindowCreator();
+            }
+        },
+        {
+            label : "Quit",
+            accelerato : process.platform == "darwin" ? "Command+Q" : "Ctrk + Q",
+            click(){
+                app.quit();
+            }
+        }
+    
 
-    {
-        label: "View",
-        submenu: [{role: "reload"}, {role: "toggledevtools"}]
+    ]
+},
+
+{
+    label:"View",
+    submenu : [{role:"reload"}, {role:"toggledevtools"}]
+},
+
+{
+    label:"about me",
+    click(){
+        MyBiodata();
     }
+},
+
 ]
